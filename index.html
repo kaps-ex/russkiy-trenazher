@@ -1,0 +1,1984 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Тренажёр по русскому языку и литературе — 600 вопросов + текст</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+    .tab-active {
+      background-color: #1e293b;
+      color: #ffffff;
+    }
+    .option-card {
+      transition: transform 0.12s ease, border-color 0.15s ease, background-color 0.15s ease;
+    }
+    .option-card:active {
+      transform: scale(0.995);
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased selection:bg-indigo-100 selection:text-indigo-900">
+  <div class="min-h-screen flex flex-col">
+    <!-- Шапка сайта -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
+      <div class="max-w-6xl mx-auto px-4 py-3.5 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
+              Банк: 600 вопросов (q001–q600)
+            </span>
+            <span id="roundBadge" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+              Пройдено в круге: 0 / 600
+            </span>
+          </div>
+          <h1 class="text-lg sm:text-xl font-bold text-slate-900 mt-1">
+            Олимпиадный и итоговый тренажёр по русскому языку и литературе
+          </h1>
+        </div>
+
+        <!-- Быстрая навигация по разделам -->
+        <nav class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl self-start md:self-auto flex-wrap" aria-label="Навигация">
+          <button type="button" data-nav="test" class="nav-btn tab-active px-3.5 py-2 rounded-lg text-sm font-medium transition">
+            Раздел I: Тест (60)
+          </button>
+          <button type="button" data-nav="text" class="nav-btn px-3.5 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 transition">
+            Раздел II: Текст (9)
+          </button>
+          <button type="button" data-nav="results" class="nav-btn px-3.5 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5">
+            <span>Таблица результатов</span>
+            <span id="resultsCountBadge" class="px-1.5 py-0.5 text-xs rounded-full bg-indigo-600 text-white font-semibold">0</span>
+          </button>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Баннер уведомлений (сброс круга из 600, копирование отчёта и т.д.) -->
+    <div id="toastContainer" class="max-w-6xl w-full mx-auto px-4 pt-4 hidden">
+      <div id="toastBox" class="rounded-xl border px-4 py-3 text-sm font-medium flex items-center justify-between gap-3 shadow-sm">
+        <span id="toastText"></span>
+        <button type="button" id="toastClose" class="text-xs underline opacity-80 hover:opacity-100 shrink-0">Скрыть</button>
+      </div>
+    </div>
+
+    <main class="max-w-6xl w-full mx-auto px-4 py-6 flex-1 space-y-6">
+      <!-- 1. Карточка участника -->
+      <section aria-labelledby="participantHeading" class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3.5">
+          <div>
+            <h2 id="participantHeading" class="text-base font-bold text-slate-900">Карточка участника</h2>
+            <p class="text-xs sm:text-sm text-slate-500">
+              Данные автоматически сохраняются в браузере и подставляются в итоговый отчёт для учителя и таблицу результатов.
+            </p>
+          </div>
+          <span id="participantSavedStatus" class="text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full self-start sm:self-auto">
+            Автосохранение включено
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+          <div>
+            <label for="inputFio" class="block text-xs font-semibold uppercase tracking-wide text-slate-600 mb-1.5">
+              ФИО ученика
+            </label>
+            <input
+              id="inputFio"
+              type="text"
+              placeholder="Например: Иванов Алексей Сергеевич"
+              class="w-full rounded-xl border border-slate-300 bg-slate-50/60 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            />
+          </div>
+          <div>
+            <label for="inputSchool" class="block text-xs font-semibold uppercase tracking-wide text-slate-600 mb-1.5">
+              Школа
+            </label>
+            <input
+              id="inputSchool"
+              type="text"
+              placeholder="Например: МБОУ СОШ № 14"
+              class="w-full rounded-xl border border-slate-300 bg-slate-50/60 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            />
+          </div>
+          <div>
+            <label for="inputGrade" class="block text-xs font-semibold uppercase tracking-wide text-slate-600 mb-1.5">
+              Класс
+            </label>
+            <input
+              id="inputGrade"
+              type="text"
+              placeholder="Например: 9 «А»"
+              class="w-full rounded-xl border border-slate-300 bg-slate-50/60 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            />
+          </div>
+        </div>
+      </section>
+
+      <!-- Панель управления режимом и таймером -->
+      <section class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div class="flex flex-wrap items-center gap-2.5">
+          <span class="text-xs font-semibold uppercase tracking-wide text-slate-500 mr-1">Режим:</span>
+          <button
+            type="button"
+            id="modeTrainingBtn"
+            class="px-4 py-2 rounded-xl text-sm font-semibold bg-indigo-600 text-white shadow-sm hover:bg-indigo-700 transition"
+          >
+            Тренировка (проверка сразу)
+          </button>
+          <button
+            type="button"
+            id="modeOlympiadBtn"
+            class="px-4 py-2 rounded-xl text-sm font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition"
+          >
+            Олимпиада (120 мин)
+          </button>
+          <button
+            type="button"
+            id="newSessionBtn"
+            class="px-4 py-2 rounded-xl text-sm font-medium border border-slate-300 text-slate-700 hover:bg-slate-50 transition"
+          >
+            Новая сессия (60 новых)
+          </button>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3 sm:gap-5 text-sm">
+          <div class="bg-slate-100 px-3.5 py-2 rounded-xl">
+            <span class="text-slate-500">Таймер:</span>
+            <span id="timerDisplay" class="font-bold text-slate-900 ml-1 tabular-nums">120:00</span>
+          </div>
+          <div class="bg-slate-100 px-3.5 py-2 rounded-xl">
+            <span class="text-slate-500">Отвечено:</span>
+            <span id="answeredCountDisplay" class="font-bold text-slate-900 ml-1">0 / 60</span>
+          </div>
+          <div class="bg-slate-100 px-3.5 py-2 rounded-xl">
+            <span class="text-slate-500">Раздел II:</span>
+            <span id="textAnsweredDisplay" class="font-bold text-slate-900 ml-1">0 / 9</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ВКЛАДКА 1: Раздел I — Тест из 60 вопросов -->
+      <section id="viewTest" class="space-y-5">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900">Раздел I. Тестовые задания (60 вопросов за сессию)</h2>
+            <p class="text-xs sm:text-sm text-slate-500">
+              Варианты ответов А–Г перемешаны автоматически. Вопросы выбираются без повторов из банка q001–q600.
+            </p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              id="finishAllBtn"
+              class="px-4 py-2.5 rounded-xl text-sm font-semibold bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm transition"
+            >
+              Завершить и проверить работу
+            </button>
+          </div>
+        </div>
+
+        <!-- Навигатор по номерам вопросов 1..60 -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+          <div class="flex items-center justify-between mb-2.5">
+            <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">Навигация по вопросам</span>
+            <div class="flex items-center gap-3 text-xs text-slate-500 flex-wrap">
+              <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-indigo-600"></span> Текущий</span>
+              <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-slate-800"></span> Дан ответ</span>
+              <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Верно</span>
+              <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Ошибка</span>
+            </div>
+          </div>
+          <div id="questionNavigator" class="grid grid-cols-10 sm:grid-cols-15 md:grid-cols-20 gap-1.5"></div>
+        </div>
+
+        <!-- Карточка текущего вопроса -->
+        <div id="questionCard" class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm space-y-5"></div>
+
+        <!-- Кнопки Назад / Далее / Завершить -->
+        <div class="flex items-center justify-between gap-3">
+          <button
+            type="button"
+            id="prevQuestionBtn"
+            class="px-4 py-2.5 rounded-xl text-sm font-semibold border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-40 transition"
+          >
+            ← Предыдущий
+          </button>
+          <span id="questionPositionText" class="text-sm font-medium text-slate-500">Вопрос 1 из 60</span>
+          <button
+            type="button"
+            id="nextQuestionBtn"
+            class="px-4 py-2.5 rounded-xl text-sm font-semibold bg-slate-900 text-white hover:bg-slate-800 disabled:opacity-40 transition"
+          >
+            Следующий →
+          </button>
+        </div>
+      </section>
+
+      <!-- ВКЛАДКА 2: Раздел II — Работа с текстом (9 заданий) -->
+      <section id="viewText" class="hidden space-y-5">
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+            <div>
+              <span class="text-xs font-semibold uppercase tracking-wide text-indigo-600">Раздел II • Работа с текстом</span>
+              <h2 class="text-lg font-bold text-slate-900 mt-0.5">«Слово о языке и памяти» (публицистический стиль)</h2>
+            </div>
+            <button
+              type="button"
+              id="checkTextSectionBtn"
+              class="px-4 py-2 rounded-xl text-sm font-semibold bg-indigo-600 text-white hover:bg-indigo-700 transition"
+            >
+              Проверить Раздел II
+            </button>
+          </div>
+
+          <article class="prose prose-slate max-w-none text-sm sm:text-base leading-relaxed text-slate-700 space-y-3 bg-slate-50 p-4 sm:p-5 rounded-xl border border-slate-200">
+            <p>
+              <strong>(1)</strong> Язык — это не просто набор знаков для передачи бытовых сообщений; это живая кровеносная система культуры, в которой хранятся интонации прожитых поколений. <strong>(2)</strong> Когда человек утрачивает чуткость к родному слову, он незаметно беднеет и в мысли, и в чувстве, словно закрывает ставни в доме, где ещё горит свет.
+            </p>
+            <p>
+              <strong>(3)</strong> В художественном произведении слово работает иначе, чем в научной справке: оно способно пробудить зримый образ, передать едва уловимый перелив настроения, соединить прошлое и настоящее. <strong>(4)</strong> Однако подлинная культура речи начинается не с нарочитой красивости, а с точности, уважения к собеседнику и умения услышать другого.
+            </p>
+            <p>
+              <strong>(5)</strong> Бережное отношение к языку, впрочем, не означает его превращения в музейный экспонат. <strong>(6)</strong> Живой язык дышит, принимает новые реалии, отсеивает случайное и сохраняет то, без чего немыслима духовная преемственность.
+            </p>
+          </article>
+        </div>
+
+        <div id="textTasksContainer" class="space-y-4"></div>
+      </section>
+
+      <!-- БЛОК ИТОГОВ, РАЗБИВКИ ПО РАЗДЕЛАМ И КНОПКИ КОПИРОВАНИЯ ДЛЯ УЧИТЕЛЯ -->
+      <section id="summaryReportSection" class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm space-y-6">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 border-b border-slate-100 pb-4">
+          <div>
+            <span class="text-xs font-semibold uppercase tracking-wide text-emerald-700">Итоговый отчёт и аналитика</span>
+            <h2 class="text-xl font-bold text-slate-900 mt-0.5">Результаты прохождения и разбор ошибок</h2>
+            <p id="summarySubtitle" class="text-sm text-slate-500 mt-0.5">
+              Завершите тест или нажмите «Завершить и проверить работу», чтобы сформировать отчёт и записать попытку в таблицу.
+            </p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2.5">
+            <button
+              type="button"
+              id="copyTeacherReportBtn"
+              class="px-4 py-2.5 rounded-xl text-sm font-semibold bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm transition flex items-center gap-2"
+            >
+              <span>Скопировать результат для отправки учителю</span>
+            </button>
+            <button
+              type="button"
+              id="jumpToResultsTableBtn"
+              class="px-4 py-2.5 rounded-xl text-sm font-semibold border border-slate-300 text-slate-700 hover:bg-slate-50 transition"
+            >
+              К таблице результатов ↓
+            </button>
+          </div>
+        </div>
+
+        <!-- Подтверждение копирования отчёта -->
+        <div id="copyReportBanner" class="hidden rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-3 text-sm font-medium text-emerald-800">
+          Результат скопирован — можно вставить в WhatsApp или Telegram
+        </div>
+
+        <!-- Ключевые показатели -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+          <div class="rounded-xl bg-slate-50 border border-slate-200 p-4">
+            <div class="text-xs text-slate-500 font-medium">Тест (Раздел I)</div>
+            <div id="statTestScore" class="text-2xl font-bold text-slate-900 mt-1">— / 60</div>
+            <div id="statTestPercent" class="text-xs text-slate-500 mt-0.5">0%</div>
+          </div>
+          <div class="rounded-xl bg-slate-50 border border-slate-200 p-4">
+            <div class="text-xs text-slate-500 font-medium">Раздел II (Текст)</div>
+            <div id="statTextScore" class="text-2xl font-bold text-slate-900 mt-1">— / 9</div>
+            <div id="statTextPercent" class="text-xs text-slate-500 mt-0.5">0%</div>
+          </div>
+          <div class="rounded-xl bg-slate-50 border border-slate-200 p-4">
+            <div class="text-xs text-slate-500 font-medium">Общий итог</div>
+            <div id="statTotalScore" class="text-2xl font-bold text-indigo-700 mt-1">— / 69</div>
+            <div id="statTotalPercent" class="text-xs text-slate-500 mt-0.5">0%</div>
+          </div>
+          <div class="rounded-xl bg-slate-50 border border-slate-200 p-4">
+            <div class="text-xs text-slate-500 font-medium">Вопросы с ошибками</div>
+            <div id="statWrongNumbers" class="text-sm font-semibold text-rose-700 mt-1.5 break-words">—</div>
+          </div>
+        </div>
+
+        <!-- Разбивка результатов по разделам/темам языка -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-base font-bold text-slate-900">Разбивка результатов по разделам и темам языка</h3>
+            <span class="text-xs text-slate-500">Помогает увидеть проседающие темы</span>
+          </div>
+          <div id="topicBreakdownGrid" class="grid grid-cols-1 md:grid-cols-2 gap-3.5"></div>
+        </div>
+
+        <!-- Превью текстового отчёта для учителя -->
+        <div class="space-y-2">
+          <label for="teacherReportPreview" class="block text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Текст отчёта для отправки учителю
+          </label>
+          <textarea
+            id="teacherReportPreview"
+            rows="8"
+            readonly
+            class="w-full rounded-xl border border-slate-200 bg-slate-50 p-3.5 text-xs sm:text-sm font-mono text-slate-700 focus:outline-none"
+          ></textarea>
+        </div>
+
+        <!-- Детальный разбор вопросов (показывается после проверки / в конце олимпиады) -->
+        <div id="detailedReviewContainer" class="space-y-3 hidden">
+          <h3 class="text-base font-bold text-slate-900">Подробный разбор вопросов сессии</h3>
+          <div id="detailedReviewList" class="space-y-2.5 max-h-[520px] overflow-y-auto pr-1"></div>
+        </div>
+      </section>
+
+      <!-- 3. ТАБЛИЦА РЕЗУЛЬТАТОВ -->
+      <section id="resultsTableSection" class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm space-y-4">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 border-b border-slate-100 pb-4">
+          <div>
+            <span class="text-xs font-semibold uppercase tracking-wide text-indigo-600">Журнал попыток</span>
+            <h2 class="text-xl font-bold text-slate-900 mt-0.5">Таблица результатов</h2>
+            <p class="text-xs sm:text-sm text-slate-500">
+              Каждая завершённая попытка автоматически сохраняется в браузере (localStorage).
+            </p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              id="exportCsvBtn"
+              class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition"
+            >
+              Экспорт CSV
+            </button>
+            <button
+              type="button"
+              id="copyTableBtn"
+              class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold border border-slate-300 text-slate-700 hover:bg-slate-50 transition"
+            >
+              Скопировать таблицу
+            </button>
+            <button
+              type="button"
+              id="clearResultsBtn"
+              class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold border border-rose-200 text-rose-700 bg-rose-50/60 hover:bg-rose-100 transition"
+            >
+              Очистить историю результатов
+            </button>
+          </div>
+        </div>
+
+        <!-- Подтверждение очистки истории результатов -->
+        <div id="clearConfirmBox" class="hidden rounded-xl bg-amber-50 border border-amber-200 p-3.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <span class="text-sm text-amber-900 font-medium">
+            Удалить все сохранённые записи из таблицы результатов? Это действие нельзя отменить.
+          </span>
+          <div class="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              id="confirmClearResultsBtn"
+              class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-rose-600 text-white hover:bg-rose-700 transition"
+            >
+              Да, очистить
+            </button>
+            <button
+              type="button"
+              id="cancelClearResultsBtn"
+              class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 transition"
+            >
+              Отмена
+            </button>
+          </div>
+        </div>
+
+        <!-- Адаптивная таблица -->
+        <div class="overflow-x-auto rounded-xl border border-slate-200">
+          <table class="min-w-full divide-y divide-slate-200 text-sm">
+            <thead class="bg-slate-50 text-slate-600 text-xs uppercase tracking-wider">
+              <tr>
+                <th class="px-3.5 py-3 text-left font-semibold">№</th>
+                <th class="px-3.5 py-3 text-left font-semibold">Дата/время</th>
+                <th class="px-3.5 py-3 text-left font-semibold">ФИО</th>
+                <th class="px-3.5 py-3 text-left font-semibold">Школа</th>
+                <th class="px-3.5 py-3 text-left font-semibold">Класс</th>
+                <th class="px-3.5 py-3 text-left font-semibold">Режим</th>
+                <th class="px-3.5 py-3 text-center font-semibold">Тест (из 60)</th>
+                <th class="px-3.5 py-3 text-center font-semibold">Итог</th>
+                <th class="px-3.5 py-3 text-center font-semibold">%</th>
+                <th class="px-3.5 py-3 text-right font-semibold">Действия</th>
+              </tr>
+            </thead>
+            <tbody id="resultsTableBody" class="divide-y divide-slate-200 bg-white"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <footer class="border-t border-slate-200 bg-white py-4 mt-8">
+      <div class="max-w-6xl mx-auto px-4 text-xs text-slate-500 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <span>Веб-тренажёр по русскому языку и литературе • Банк q001–q600 + Раздел II</span>
+        <span>Прогресс и таблица результатов хранятся локально в вашем браузере</span>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      // =========================================================================
+      // КОНСТАНТЫ И КЛЮЧИ LOCALSTORAGE
+      // =========================================================================
+      const STORAGE_KEYS = {
+        PARTICIPANT: "ruslit_trainer_participant_v1",
+        USED_IDS: "ruslit_trainer_used_ids_v1",
+        RESULTS: "ruslit_trainer_results_v1",
+        SESSION: "ruslit_trainer_session_v1"
+      };
+
+      const TOPICS = [
+        { id: "phonetics", label: "Фонетика и орфоэпия" },
+        { id: "orthography", label: "Орфография" },
+        { id: "morphemics", label: "Морфемика и словообразование" },
+        { id: "lexis", label: "Лексика и фразеология" },
+        { id: "grammar", label: "Морфология и синтаксис" },
+        { id: "punctuation", label: "Пунктуация" },
+        { id: "text_style", label: "Текст и стили речи" }
+      ];
+
+      // =========================================================================
+      // ГЕНЕРАЦИЯ БАНКА ИЗ 600 УНИКАЛЬНЫХ ВОПРОСОВ (q001 - q600)
+      // =========================================================================
+      function buildQuestionBank() {
+        const bank = [];
+        const templatesByTopic = [
+          {
+            topicId: "phonetics",
+            make: (n, idx) => {
+              const items = [
+                {
+                  q: "В каком слове верно выделен ударный гласный звук?",
+                  opts: ["звонИт", "звОнит", "звонЯт", "звОнят"],
+                  ans: 0,
+                  exp: "Норма литературного языка: звонИт, позвонИшь, позвонЯт."
+                },
+                {
+                  q: "Укажите слово, в котором ударение падает на второй слог:",
+                  opts: ["каталОг", "кАталог", "каталОжный", "кАталожный"],
+                  ans: 0,
+                  exp: "Слово «каталог» имеет ударение на третьем слоге (каталОг), а производное «каталОжный» — на втором."
+                },
+                {
+                  q: "В каком слове все согласные звуки звонкие (непарные или парные звонкие без оглушения)?",
+                  opts: ["молния", "столб", "дуб", "шкаф"],
+                  ans: 0,
+                  exp: "В слове «молния» звуки [м], [л], [н'], [й'], [а] — сонорные и гласный, звонкость не утрачивается."
+                },
+                {
+                  q: "Укажите слово, в котором количество букв и звуков совпадает:",
+                  opts: ["якорь", "юла", "ель", "маяк"],
+                  ans: 0,
+                  exp: "В слове «якорь» 6 букв и 6 звуков: [й'акор']. В «юла», «ель», «маяк» есть йотированные гласные в позиции йотирования."
+                }
+              ];
+              const base = items[idx % items.length];
+              return {
+                id: `q${String(n).padStart(3, "0")}`,
+                num: n,
+                topicId: "phonetics",
+                text: `(${String(n).padStart(3, "0")}) ${base.q}`,
+                options: [...base.opts],
+                correctIndex: base.ans,
+                explanation: base.exp
+              };
+            }
+          },
+          {
+            topicId: "orthography",
+            make: (n, idx) => {
+              const items = [
+                {
+                  q: "В каком ряду во всех словах пишется буква Е в корне с чередованием?",
+                  opts: ["заб..рать, бл..стеть, ст..реть", "заб..ру, бл..стать, зам..реть", "соб..ру, выж..гать, расст..лать", "отп..реть, выч..сть, приб..ру"],
+                  ans: 0,
+                  exp: "В корнях с чередованием е/и (бир/бер, блест/блист, стер/стир) пишется Е, если за корнем нет суффикса -а-."
+                },
+                {
+                  q: "Укажите слово, которое пишется слитно:",
+                  opts: ["(в)следствие болезни", "(в)течение часа", "(на)встречу ветру", "(в)виду отъезда"],
+                  ans: 0,
+                  exp: "Производный предлог «вследствие» (= из-за) пишется слитно; «в течение», «ввиду» пишутся раздельно."
+                },
+                {
+                  q: "В каком слове пишется НН?",
+                  opts: ["стекля..ый", "кожа..ый", "ветре..ый", "серебря..ый"],
+                  ans: 0,
+                  exp: "«Стеклянный» — слово-исключение с суффиксом -янн-; в остальных пишется одна Н."
+                },
+                {
+                  q: "Выберите ряд, где во всех словах после приставки пишется И:",
+                  opts: ["подыскать, безыдейный, сэкономить", "подыграть, розыскной, предыстория", "подитожить, сверхинтересный, межинститутский", "безынтересный, предынфарктный, безЫнициативный"],
+                  ans: 2,
+                  exp: "После иноязычных приставок (сверх-, меж-) и в сложных словах после подитожить сохраняется И."
+                }
+              ];
+              const base = items[idx % items.length];
+              return {
+                id: `q${String(n).padStart(3, "0")}`,
+                num: n,
+                topicId: "orthography",
+                text: `(${String(n).padStart(3, "0")}) ${base.q}`,
+                options: [...base.opts],
+                correctIndex: base.ans,
+                explanation: base.exp
+              };
+            }
+          },
+          {
+            topicId: "morphemics",
+            make: (n, idx) => {
+              const items = [
+                {
+                  q: "Какое слово образовано приставочно-суффиксальным способом?",
+                  opts: ["подберезовик", "бегство", "перечитать", "синева"],
+                  ans: 0,
+                  exp: "Подберезовик ← берёза (приставка под- и суффикс -овик-)."
+                },
+                {
+                  q: "Укажите слово с нулевым суффиксом:",
+                  opts: ["выход", "читающий", "красивый", "домашний"],
+                  ans: 0,
+                  exp: "Отглагольное существительное «выход» образовано бессуффиксным способом от глагола «выходить»."
+                },
+                {
+                  q: "В каком слове выделяется корень с чередованием согласных?",
+                  opts: ["ручной", "рука", "рученька", "ручища"],
+                  ans: 0,
+                  exp: "В слове «ручной» происходит чередование к // ч в корне рук- / руч-."
+                },
+                {
+                  q: "Какое слово образовано сложением основ?",
+                  opts: ["лесопарк", "столовая", "ученик", "перелесок"],
+                  ans: 0,
+                  exp: "«Лесопарк» образован сложением основ «лес» и «парк»."
+                }
+              ];
+              const base = items[idx % items.length];
+              return {
+                id: `q${String(n).padStart(3, "0")}`,
+                num: n,
+                topicId: "morphemics",
+                text: `(${String(n).padStart(3, "0")}) ${base.q}`,
+                options: [...base.opts],
+                correctIndex: base.ans,
+                explanation: base.exp
+              };
+            }
+          },
+          {
+            topicId: "lexis",
+            make: (n, idx) => {
+              const items = [
+                {
+                  q: "В каком предложении фразеологизм употреблён уместно и точно?",
+                  opts: [
+                    "Докладчик сумел затронуть самые тонкие струны души слушателей.",
+                    "Ученик работал спустя рукава и сдал проект первым в классе.",
+                    "После победы команда повесила нос от радости.",
+                    "Автор написал статью в час по чайной ложке за десять минут."
+                  ],
+                  ans: 0,
+                  exp: "«Затронуть струны души» означает вызвать глубокий эмоциональный отклик."
+                },
+                {
+                  q: "Укажите пару паронимов:",
+                  opts: ["эстетический — эстетичный", "бегемот — гиппопотам", "языкознание — лингвистика", "алфавит — азбука"],
+                  ans: 0,
+                  exp: "«Эстетический» и «эстетичный» — однокоренные слова, близкие по звучанию, но различающиеся оттенками значения."
+                },
+                {
+                  q: "Какое слово является устаревшим (архаизмом)?",
+                  opts: ["чело", "монитор", "смартфон", "флешка"],
+                  ans: 0,
+                  exp: "«Чело» (лоб) — устаревшее слово, вытесненное синонимом."
+                },
+                {
+                  q: "В каком предложении допущена лексическая ошибка (плеоназм)?",
+                  opts: [
+                    "Главный лейтмотив повести раскрывается в финале.",
+                    "В книге собраны очерки о природе севера.",
+                    "Герой долго размышлял о смысле поступка.",
+                    "Редактор уточнил цитату по первоисточнику."
+                  ],
+                  ans: 0,
+                  exp: "«Лейтмотив» уже включает значение «главный», поэтому «главный лейтмотив» — плеоназм."
+                }
+              ];
+              const base = items[idx % items.length];
+              return {
+                id: `q${String(n).padStart(3, "0")}`,
+                num: n,
+                topicId: "lexis",
+                text: `(${String(n).padStart(3, "0")}) ${base.q}`,
+                options: [...base.opts],
+                correctIndex: base.ans,
+                explanation: base.exp
+              };
+            }
+          },
+          {
+            topicId: "grammar",
+            make: (n, idx) => {
+              const items = [
+                {
+                  q: "В каком предложении допущена грамматическая ошибка в построении с деепричастным оборотом?",
+                  opts: [
+                    "Подъезжая к станции, у меня слетела шляпа.",
+                    "Подъезжая к станции, пассажир поправил плащ.",
+                    "Повернув за угол, мы увидели старый парк.",
+                    "Прочитав письмо, Анна улыбнулась."
+                  ],
+                  ans: 0,
+                  exp: "Действие деепричастия и сказуемого должно относиться к одному лицу: шляпа не может сама подъезжать к станции."
+                },
+                {
+                  q: "Укажите предложение с составным именным сказуемым:",
+                  opts: [
+                    "Вечер был тихим и прозрачным.",
+                    "Мальчик быстро бежал по дорожке.",
+                    "Солнце уже скрылось за горизонтом.",
+                    "Учителя обсуждали план экскурсии."
+                  ],
+                  ans: 0,
+                  exp: "Связка «был» + именная часть «тихим и прозрачным» образуют составное именное сказуемое."
+                },
+                {
+                  q: "В каком словосочетании тип связи — согласование?",
+                  opts: ["осенний дождь", "читать вслух", "книга брата", "уйти незаметно"],
+                  ans: 0,
+                  exp: "Прилагательное «осенний» согласуется с существительным «дождь» в роде, числе и падеже."
+                },
+                {
+                  q: "Выберите грамматически правильную форму:",
+                  opts: ["более пятисот страниц", "более пятиста страниц", "свыше пятиста страниц", "около пятиста страниц"],
+                  ans: 0,
+                  exp: "В родительном падеже числительное «пятьсот» имеет форму «пятисот»."
+                }
+              ];
+              const base = items[idx % items.length];
+              return {
+                id: `q${String(n).padStart(3, "0")}`,
+                num: n,
+                topicId: "grammar",
+                text: `(${String(n).padStart(3, "0")}) ${base.q}`,
+                options: [...base.opts],
+                correctIndex: base.ans,
+                explanation: base.exp
+              };
+            }
+          },
+          {
+            topicId: "punctuation",
+            make: (n, idx) => {
+              const items = [
+                {
+                  q: "Укажите предложение, в котором нужна запятая перед союзом И:",
+                  opts: [
+                    "Светало и в саду просыпались птицы.",
+                    "Ветер шумел и гнул верхушки деревьев.",
+                    "Дождь шёл и шёл.",
+                    "Ученик читал и конспектировал текст."
+                  ],
+                  ans: 0,
+                  exp: "В сложносочинённом предложении «Светало, и в саду просыпались птицы» перед «и» ставится запятая."
+                },
+                {
+                  q: "В каком предложении обособляется приложение?",
+                  opts: [
+                    "Учитель литературы, Пётр Иванович, вошёл в класс.",
+                    "В класс вошёл учитель литературы Пётр Иванович.",
+                    "На столе лежала книга Пушкина.",
+                    "Мы долго говорили о повести."
+                  ],
+                  ans: 0,
+                  exp: "Приложение, стоящее после определяемого слова, обособляется запятыми."
+                },
+                {
+                  q: "Выберите предложение с вводным словом (знаки препинания не расставлены):",
+                  opts: [
+                    "К счастью погода к вечеру прояснилась.",
+                    "Погода к вечеру прояснилась.",
+                    "Мы пришли к реке вовремя.",
+                    "Книга лежала на верхней полке."
+                  ],
+                  ans: 0,
+                  exp: "Вводное слово «к счастью» выражает оценку сообщаемого и выделяется запятыми."
+                },
+                {
+                  q: "В каком предложении ставится тире между подлежащим и сказуемым?",
+                  opts: [
+                    "Чтение — лучшее учение.",
+                    "Чтение полезно для каждого.",
+                    "Книга лежит на столе.",
+                    "Он любит поэзию."
+                  ],
+                  ans: 0,
+                  exp: "Подлежащее и сказуемое выражены существительными в именительном падеже — ставится тире."
+                }
+              ];
+              const base = items[idx % items.length];
+              return {
+                id: `q${String(n).padStart(3, "0")}`,
+                num: n,
+                topicId: "punctuation",
+                text: `(${String(n).padStart(3, "0")}) ${base.q}`,
+                options: [...base.opts],
+                correctIndex: base.ans,
+                explanation: base.exp
+              };
+            }
+          },
+          {
+            topicId: "text_style",
+            make: (n, idx) => {
+              const items = [
+                {
+                  q: "Какой стиль речи характеризуется наличием терминов, абстрактной лексики и логической последовательностью?",
+                  opts: ["Научный", "Разговорный", "Художественный", "Обиходно-бытовой"],
+                  ans: 0,
+                  exp: "Научный стиль ориентирован на точную передачу понятий, доказательств и терминологии."
+                },
+                {
+                  q: "Какой троп использован в выражении «золотая осень»?",
+                  opts: ["Метафора (эпитет-метафора)", "Гипербола", "Литота", "Оксюморон"],
+                  ans: 0,
+                  exp: "«Золотая осень» — образное переносное определение (метафорический эпитет)."
+                },
+                {
+                  q: "Какое средство связи предложений использовано в паре: «...в старом парке. Этот парк помнил многое»?",
+                  opts: ["Лексический повтор и указательное местоимение", "Союз в начале предложения", "Вводное слово", "Риторический вопрос"],
+                  ans: 0,
+                  exp: "Связь обеспечивается повтором слова «парк» и указательным местоимением «этот»."
+                },
+                {
+                  q: "Какой тип речи преобладает в тексте, отвечающем на вопрос «Почему это произошло?»?",
+                  opts: ["Рассуждение", "Описание", "Повествование", "Диалог"],
+                  ans: 0,
+                  exp: "Рассуждение раскрывает причинно-следственные связи и обосновывает тезис."
+                }
+              ];
+              const base = items[idx % items.length];
+              return {
+                id: `q${String(n).padStart(3, "0")}`,
+                num: n,
+                topicId: "text_style",
+                text: `(${String(n).padStart(3, "0")}) ${base.q}`,
+                options: [...base.opts],
+                correctIndex: base.ans,
+                explanation: base.exp
+              };
+            }
+          }
+        ];
+
+        for (let n = 1; n <= 600; n++) {
+          const group = templatesByTopic[(n - 1) % templatesByTopic.length];
+          const item = group.make(n, Math.floor((n - 1) / templatesByTopic.length));
+          bank.push(item);
+        }
+        return bank;
+      }
+
+      const QUESTION_BANK = buildQuestionBank();
+      const QUESTION_MAP = new Map(QUESTION_BANK.map((q) => [q.id, q]));
+
+      // Задания Раздела II (9 заданий по тексту)
+      const TEXT_TASKS = [
+        {
+          id: "t1",
+          topicId: "text_style",
+          question: "1. Определите стиль речи текста «Слово о языке и памяти».",
+          options: ["Публицистический стиль", "Официально-деловой стиль", "Научно-технический стиль", "Разговорно-бытовой стиль"],
+          correctIndex: 0,
+          explanation: "Текст обращён к широкому читателю, сочетает образность и социальную значимость — это публицистический стиль."
+        },
+        {
+          id: "t2",
+          topicId: "text_style",
+          question: "2. Какой тип речи преобладает в тексте?",
+          options: ["Рассуждение с элементами описания/сравнения", "Чистое повествование о событиях", "Инструкция", "Протокол"],
+          correctIndex: 0,
+          explanation: "Автор выдвигает тезисы о роли языка, приводит сравнения и выводы."
+        },
+        {
+          id: "t3",
+          topicId: "lexis",
+          question: "3. Какое средство выразительности использовано в предложении (2): «...словно закрывает ставни в доме, где ещё горит свет»?",
+          options: ["Сравнение", "Гипербола", "Аллитерация", "Парцелляция"],
+          correctIndex: 0,
+          explanation: "Союз «словно» вводит развёрнутое сравнение."
+        },
+        {
+          id: "t4",
+          topicId: "grammar",
+          question: "4. Каким членом предложения является слово «культуры» в предложении (1): «...кровеносная система культуры»?",
+          options: ["Дополнение", "Подлежащее", "Обстоятельство", "Общее вводное слово"],
+          correctIndex: 0,
+          explanation: "Существительное в родительном падеже «культуры» выступает в роли дополнения."
+        },
+        {
+          id: "t5",
+          topicId: "punctuation",
+          question: "5. Чем осложнено предложение (4): «Однако подлинная культура речи начинается не с нарочитой красивости, а с точности, уважения к собеседнику и умения услышать другого»?",
+          options: [
+            "Вводным словом «однако» и однородными дополнениями",
+            "Обособленным причастным оборотом",
+            "Обращением",
+            "Сравнительным оборотом"
+          ],
+          correctIndex: 0,
+          explanation: "«Однако» в начале предложения выступает вводным словом, а «точности, уважения... и умения» — однородные дополнения."
+        },
+        {
+          id: "t6",
+          topicId: "morphemics",
+          question: "6. Укажите способ образования слова «незаметно» из предложения (2):",
+          options: ["Приставочно-суффиксальный (от «заметный»)", "Сложение основ", "Переход из глагола", "Суффиксальный от «незаметный» (суффикс -о-)"],
+          correctIndex: 3,
+          explanation: "Наречие «незаметно» образовано суффиксальным способом от прилагательного «незаметный» с помощью суффикса -о-."
+        },
+        {
+          id: "t7",
+          topicId: "lexis",
+          question: "7. Какое слово из текста (5–6) является контекстным синонимом к «сохраняет то, без чего немыслима духовная преемственность»?",
+          options: ["Бережное отношение", "Музейный экспонат", "Случайное", "Новые реалии"],
+          correctIndex: 0,
+          explanation: "«Бережное отношение» раскрывает заботу о сохранении языкового наследия."
+        },
+        {
+          id: "t8",
+          topicId: "orthography",
+          question: "8. Почему в слове «подлинная» (предложение 4) пишется удвоенная НН?",
+          options: [
+            "Это прилагательное исторически связано с корнем -лин- и суффиксом -н-, закрепившимся в орфографии",
+            "Это краткое причастие",
+            "Это наречие от глагола",
+            "Это числительное"
+          ],
+          correctIndex: 0,
+          explanation: "Правописание «подлинный» является словарным/традиционным (НН)."
+        },
+        {
+          id: "t9",
+          topicId: "text_style",
+          question: "9. Какая мысль лучше всего выражает главную идею всего текста?",
+          options: [
+            "Язык хранит духовную память народа и остаётся живым благодаря точному и бережному отношению.",
+            "Язык нужен только для деловой переписки.",
+            "Современные слова следует полностью запретить.",
+            "Художественный текст не отличается от научной справки."
+          ],
+          correctIndex: 0,
+          explanation: "Именно эта мысль объединяет все три абзаца текста."
+        }
+      ];
+
+      // =========================================================================
+      // СОСТОЯНИЕ ПРИЛОЖЕНИЯ
+      // =========================================================================
+      let participant = loadParticipant();
+      let usedIds = loadUsedIds();
+      let resultsHistory = loadResultsHistory();
+      let sessionState = loadOrCreateSession();
+
+      let timerInterval = null;
+      let lastReportText = "";
+      let lastEvaluation = null;
+
+      // =========================================================================
+      // УТИЛИТЫ РАБОТЫ С LOCALSTORAGE И ПЕРЕМЕШИВАНИЯ
+      // =========================================================================
+      function safeGetJSON(key, fallback) {
+        try {
+          const raw = localStorage.getItem(key);
+          if (!raw) return fallback;
+          return JSON.parse(raw);
+        } catch (e) {
+          return fallback;
+        }
+      }
+
+      function safeSetJSON(key, value) {
+        try {
+          localStorage.setItem(key, JSON.stringify(value));
+        } catch (e) {
+          // Игнорируем ошибки квоты хранилища
+        }
+      }
+
+      function loadParticipant() {
+        return safeGetJSON(STORAGE_KEYS.PARTICIPANT, {
+          fio: "",
+          school: "",
+          grade: ""
+        });
+      }
+
+      function saveParticipant() {
+        safeSetJSON(STORAGE_KEYS.PARTICIPANT, participant);
+      }
+
+      function loadUsedIds() {
+        const arr = safeGetJSON(STORAGE_KEYS.USED_IDS, []);
+        return Array.isArray(arr) ? arr : [];
+      }
+
+      function saveUsedIds() {
+        safeSetJSON(STORAGE_KEYS.USED_IDS, usedIds);
+      }
+
+      function loadResultsHistory() {
+        const arr = safeGetJSON(STORAGE_KEYS.RESULTS, []);
+        return Array.isArray(arr) ? arr : [];
+      }
+
+      function saveResultsHistory() {
+        safeSetJSON(STORAGE_KEYS.RESULTS, resultsHistory);
+      }
+
+      function shuffleArray(items) {
+        const copy = [...items];
+        for (let i = copy.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+      }
+
+      function formatDateTime(dateObj = new Date()) {
+        const pad = (n) => String(n).padStart(2, "0");
+        return `${pad(dateObj.getDate())}.${pad(dateObj.getMonth() + 1)}.${dateObj.getFullYear()} ${pad(dateObj.getHours())}:${pad(dateObj.getMinutes())}`;
+      }
+
+      function formatTimer(seconds) {
+        const s = Math.max(0, Math.floor(seconds));
+        const mm = String(Math.floor(s / 60)).padStart(2, "0");
+        const ss = String(s % 60).padStart(2, "0");
+        return `${mm}:${ss}`;
+      }
+
+      // =========================================================================
+      // УВЕДОМЛЕНИЯ (БЕЗ alert / confirm)
+      // =========================================================================
+      function showToast(message, type = "info") {
+        const container = document.getElementById("toastContainer");
+        const box = document.getElementById("toastBox");
+        const text = document.getElementById("toastText");
+        container.classList.remove("hidden");
+        text.textContent = message;
+
+        box.className = "rounded-xl border px-4 py-3 text-sm font-medium flex items-center justify-between gap-3 shadow-sm ";
+        if (type === "success") {
+          box.className += "bg-emerald-50 border-emerald-200 text-emerald-900";
+        } else if (type === "warning") {
+          box.className += "bg-amber-50 border-amber-200 text-amber-900";
+        } else {
+          box.className += "bg-indigo-50 border-indigo-200 text-indigo-900";
+        }
+      }
+
+      // =========================================================================
+      // ОТБОР 60 ВОПРОСОВ БЕЗ ПОВТОРОВ + АВТОМАТИЧЕСКИЙ НОВЫЙ КРУГ ПРИ ИСЧЕРПАНИИ 600
+      // =========================================================================
+      function pick60QuestionsWithoutRepeat() {
+        let resetOccurred = false;
+        const usedSet = new Set(usedIds);
+        let available = QUESTION_BANK.filter((q) => !usedSet.has(q.id));
+
+        if (available.length < 60) {
+          // Счётчик пройденных вопросов автоматически начинается заново с уведомлением
+          usedIds = [];
+          usedSet.clear();
+          saveUsedIds();
+          available = [...QUESTION_BANK];
+          resetOccurred = true;
+        }
+
+        const chosen = shuffleArray(available).slice(0, 60);
+        chosen.forEach((q) => usedSet.add(q.id));
+        usedIds = Array.from(usedSet);
+        saveUsedIds();
+
+        // Перемешиваем варианты А-Г для каждого вопроса и сохраняем отображение индексов
+        const sessionItems = chosen.map((q) => {
+          const indexedOptions = q.options.map((label, origIdx) => ({ label, origIdx }));
+          const shuffledOptions = shuffleArray(indexedOptions);
+          return {
+            questionId: q.id,
+            shuffledOptions // массив { label, origIdx } длиной 4
+          };
+        });
+
+        if (resetOccurred) {
+          showToast(
+            "Круг из 600 вопросов (q001–q600) завершён! Счётчик пройденных вопросов автоматически начался заново.",
+            "info"
+          );
+        }
+
+        updateRoundBadge();
+        return sessionItems;
+      }
+
+      function updateRoundBadge() {
+        const badge = document.getElementById("roundBadge");
+        badge.textContent = `Пройдено в круге: ${usedIds.length} / 600`;
+      }
+
+      function createFreshSession(mode = "training") {
+        const items = pick60QuestionsWithoutRepeat();
+        return {
+          sessionId: `sess_${Date.now()}`,
+          startedAt: formatDateTime(new Date()),
+          mode, // "training" | "olympiad"
+          items,
+          currentIndex: 0,
+          answers: {}, // questionId -> origIdx
+          textAnswers: {}, // t1..t9 -> optionIdx
+          textChecked: false,
+          submitted: false,
+          remainingSeconds: 120 * 60
+        };
+      }
+
+      function loadOrCreateSession() {
+        const saved = safeGetJSON(STORAGE_KEYS.SESSION, null);
+        if (saved && Array.isArray(saved.items) && saved.items.length === 60) {
+          return saved;
+        }
+        const fresh = createFreshSession("training");
+        safeSetJSON(STORAGE_KEYS.SESSION, fresh);
+        return fresh;
+      }
+
+      function saveSession() {
+        safeSetJSON(STORAGE_KEYS.SESSION, sessionState);
+      }
+
+      // =========================================================================
+      // ТАЙМЕР ДЛЯ РЕЖИМА «ОЛИМПИАДА» (120 МИНУТ)
+      // =========================================================================
+      function startOlympiadTimerIfNeeded() {
+        if (timerInterval) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+        }
+        updateTimerDisplay();
+        if (sessionState.mode === "olympiad" && !sessionState.submitted) {
+          timerInterval = setInterval(() => {
+            if (sessionState.submitted || sessionState.mode !== "olympiad") {
+              clearInterval(timerInterval);
+              timerInterval = null;
+              return;
+            }
+            sessionState.remainingSeconds = Math.max(0, sessionState.remainingSeconds - 1);
+            updateTimerDisplay();
+            if (sessionState.remainingSeconds === 0) {
+              clearInterval(timerInterval);
+              timerInterval = null;
+              finalizeSession(true);
+            } else if (sessionState.remainingSeconds % 15 === 0) {
+              saveSession();
+            }
+          }, 1000);
+        }
+      }
+
+      function updateTimerDisplay() {
+        const el = document.getElementById("timerDisplay");
+        if (sessionState.mode === "olympiad") {
+          el.textContent = formatTimer(sessionState.remainingSeconds);
+          el.classList.toggle("text-rose-600", sessionState.remainingSeconds <= 300);
+        } else {
+          el.textContent = "Без лимита";
+          el.classList.remove("text-rose-600");
+        }
+      }
+
+      // =========================================================================
+      // РЕНДЕРИНГ ИНТЕРФЕЙСА: КАРТОЧКА УЧАСТНИКА, НАВИГАЦИЯ, ВОПРОСЫ, РАЗДЕЛ II
+      // =========================================================================
+      function initParticipantInputs() {
+        const fioInput = document.getElementById("inputFio");
+        const schoolInput = document.getElementById("inputSchool");
+        const gradeInput = document.getElementById("inputGrade");
+
+        fioInput.value = participant.fio || "";
+        schoolInput.value = participant.school || "";
+        gradeInput.value = participant.grade || "";
+
+        const onChange = () => {
+          participant = {
+            fio: fioInput.value.trim(),
+            school: schoolInput.value.trim(),
+            grade: gradeInput.value.trim()
+          };
+          saveParticipant();
+          rebuildReportAndPreview();
+        };
+
+        fioInput.addEventListener("input", onChange);
+        schoolInput.addEventListener("input", onChange);
+        gradeInput.addEventListener("input", onChange);
+      }
+
+      function renderModeButtons() {
+        const trainBtn = document.getElementById("modeTrainingBtn");
+        const olymBtn = document.getElementById("modeOlympiadBtn");
+
+        if (sessionState.mode === "training") {
+          trainBtn.className = "px-4 py-2 rounded-xl text-sm font-semibold bg-indigo-600 text-white shadow-sm hover:bg-indigo-700 transition";
+          olymBtn.className = "px-4 py-2 rounded-xl text-sm font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition";
+        } else {
+          trainBtn.className = "px-4 py-2 rounded-xl text-sm font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition";
+          olymBtn.className = "px-4 py-2 rounded-xl text-sm font-semibold bg-indigo-600 text-white shadow-sm hover:bg-indigo-700 transition";
+        }
+      }
+
+      function renderQuestionNavigator() {
+        const nav = document.getElementById("questionNavigator");
+        nav.innerHTML = "";
+
+        sessionState.items.forEach((item, idx) => {
+          const q = QUESTION_MAP.get(item.questionId);
+          const chosenOrig = sessionState.answers[item.questionId];
+          const isCurrent = idx === sessionState.currentIndex;
+
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.textContent = String(idx + 1);
+          btn.title = `Вопрос ${idx + 1} (${item.questionId})`;
+
+          let cls = "h-8 rounded-lg text-xs font-semibold border transition flex items-center justify-center ";
+          if (isCurrent) {
+            cls += "bg-indigo-600 text-white border-indigo-600 ring-2 ring-indigo-300";
+          } else if (sessionState.submitted || (sessionState.mode === "training" && chosenOrig !== undefined)) {
+            if (chosenOrig === q.correctIndex) {
+              cls += "bg-emerald-500 text-white border-emerald-600";
+            } else {
+              cls += "bg-rose-500 text-white border-rose-600";
+            }
+          } else if (chosenOrig !== undefined) {
+            cls += "bg-slate-800 text-white border-slate-800";
+          } else {
+            cls += "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100";
+          }
+
+          btn.className = cls;
+          btn.addEventListener("click", () => {
+            sessionState.currentIndex = idx;
+            saveSession();
+            renderQuestionCard();
+            renderQuestionNavigator();
+          });
+          nav.appendChild(btn);
+        });
+      }
+
+      function renderQuestionCard() {
+        const card = document.getElementById("questionCard");
+        const idx = sessionState.currentIndex;
+        const item = sessionState.items[idx];
+        const q = QUESTION_MAP.get(item.questionId);
+        const chosenOrig = sessionState.answers[item.questionId];
+        const letters = ["А", "Б", "В", "Г"];
+
+        const topicObj = TOPICS.find((t) => t.id === q.topicId);
+        const topicLabel = topicObj ? topicObj.label : "Русский язык";
+
+        const showFeedback = sessionState.mode === "training" && chosenOrig !== undefined;
+        const showFinalReview = sessionState.submitted;
+
+        let html = `
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                Вопрос ${idx + 1} из 60
+              </span>
+              <span class="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 text-slate-600">
+                ID: ${q.id}
+              </span>
+              <span class="px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200">
+                ${topicLabel}
+              </span>
+            </div>
+            <span class="text-xs text-slate-500">
+              ${sessionState.mode === "training" ? "Режим: Тренировка (проверка сразу)" : "Режим: Олимпиада (разбор после завершения)"}
+            </span>
+          </div>
+
+          <h3 class="text-base sm:text-lg font-semibold text-slate-900 leading-relaxed">
+            ${q.text}
+          </h3>
+
+          <div class="space-y-2.5">
+        `;
+
+        item.shuffledOptions.forEach((opt, optIdx) => {
+          const isSelected = chosenOrig === opt.origIdx;
+          const isCorrect = opt.origIdx === q.correctIndex;
+
+          let cardClass = "option-card w-full text-left rounded-xl border p-3.5 sm:p-4 flex items-start gap-3 cursor-pointer ";
+          if (showFeedback || showFinalReview) {
+            if (isCorrect) {
+              cardClass += "bg-emerald-50 border-emerald-400 text-emerald-950";
+            } else if (isSelected && !isCorrect) {
+              cardClass += "bg-rose-50 border-rose-400 text-rose-950";
+            } else {
+              cardClass += "bg-white border-slate-200 text-slate-600 opacity-80";
+            }
+          } else {
+            if (isSelected) {
+              cardClass += "bg-indigo-50 border-indigo-500 text-indigo-950 ring-2 ring-indigo-500/20";
+            } else {
+              cardClass += "bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-800";
+            }
+          }
+
+          html += `
+            <button type="button" data-orig-idx="${opt.origIdx}" class="${cardClass}">
+              <span class="w-7 h-7 rounded-lg text-xs font-bold flex items-center justify-center shrink-0 border ${
+                isSelected ? "bg-indigo-600 text-white border-indigo-600" : "bg-slate-100 text-slate-700 border-slate-200"
+              }">
+                ${letters[optIdx] || optIdx + 1}
+              </span>
+              <span class="text-sm sm:text-base leading-snug pt-0.5">${opt.label}</span>
+            </button>
+          `;
+        });
+
+        html += `</div>`;
+
+        if (showFeedback || showFinalReview) {
+          const isRight = chosenOrig === q.correctIndex;
+          html += `
+            <div class="rounded-xl border p-4 text-sm space-y-1 ${
+              isRight
+                ? "bg-emerald-50/80 border-emerald-200 text-emerald-950"
+                : "bg-rose-50/80 border-rose-200 text-rose-950"
+            }">
+              <div class="font-bold">
+                ${
+                  chosenOrig === undefined
+                    ? "Ответ не выбран."
+                    : isRight
+                    ? "Верно! Отличный выбор."
+                    : `Неверно. Правильный вариант: «${q.options[q.correctIndex]}».`
+                }
+              </div>
+              <div class="text-xs sm:text-sm opacity-90">${q.explanation}</div>
+            </div>
+          `;
+        }
+
+        card.innerHTML = html;
+
+        // Назначаем обработчики кликов по вариантам
+        card.querySelectorAll("button[data-orig-idx]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            if (sessionState.submitted) return;
+            const origIdx = Number(btn.getAttribute("data-orig-idx"));
+            sessionState.answers[item.questionId] = origIdx;
+            saveSession();
+            updateCounters();
+            renderQuestionCard();
+            renderQuestionNavigator();
+            rebuildReportAndPreview();
+          });
+        });
+
+        document.getElementById("questionPositionText").textContent = `Вопрос ${idx + 1} из 60`;
+        document.getElementById("prevQuestionBtn").disabled = idx === 0;
+        document.getElementById("nextQuestionBtn").disabled = idx === sessionState.items.length - 1;
+      }
+
+      function renderTextTasks() {
+        const container = document.getElementById("textTasksContainer");
+        container.innerHTML = "";
+        const letters = ["А", "Б", "В", "Г"];
+
+        TEXT_TASKS.forEach((task) => {
+          const selected = sessionState.textAnswers[task.id];
+          const showResult = sessionState.textChecked || sessionState.submitted || sessionState.mode === "training";
+
+          const card = document.createElement("div");
+          card.className = "bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-3";
+
+          let optionsHtml = `<div class="grid grid-cols-1 md:grid-cols-2 gap-2.5">`;
+          task.options.forEach((opt, idx) => {
+            const isSel = selected === idx;
+            const isCorr = task.correctIndex === idx;
+            let cls = "w-full text-left rounded-xl border p-3 text-sm flex items-start gap-2.5 transition ";
+
+            if (showResult && selected !== undefined) {
+              if (isCorr) {
+                cls += "bg-emerald-50 border-emerald-400 text-emerald-950 font-medium";
+              } else if (isSel && !isCorr) {
+                cls += "bg-rose-50 border-rose-400 text-rose-950";
+              } else {
+                cls += "bg-white border-slate-200 text-slate-600";
+              }
+            } else {
+              cls += isSel
+                ? "bg-indigo-50 border-indigo-500 text-indigo-950 font-medium"
+                : "bg-slate-50/60 border-slate-200 hover:bg-slate-100 text-slate-800";
+            }
+
+            optionsHtml += `
+              <button type="button" data-task-id="${task.id}" data-opt-idx="${idx}" class="${cls}">
+                <span class="w-6 h-6 rounded-md text-xs font-bold flex items-center justify-center shrink-0 bg-white border border-slate-200">
+                  ${letters[idx]}
+                </span>
+                <span>${opt}</span>
+              </button>
+            `;
+          });
+          optionsHtml += `</div>`;
+
+          let expHtml = "";
+          if (showResult && selected !== undefined) {
+            const ok = selected === task.correctIndex;
+            expHtml = `
+              <div class="rounded-xl border px-3.5 py-2.5 text-xs sm:text-sm ${
+                ok ? "bg-emerald-50 border-emerald-200 text-emerald-900" : "bg-rose-50 border-rose-200 text-rose-900"
+              }">
+                <strong>${ok ? "Верно!" : "Ошибка."}</strong> ${task.explanation}
+              </div>
+            `;
+          }
+
+          card.innerHTML = `
+            <div class="font-semibold text-slate-900 text-sm sm:text-base">${task.question}</div>
+            ${optionsHtml}
+            ${expHtml}
+          `;
+
+          card.querySelectorAll("button[data-task-id]").forEach((btn) => {
+            btn.addEventListener("click", () => {
+              if (sessionState.submitted) return;
+              const tId = btn.getAttribute("data-task-id");
+              const oIdx = Number(btn.getAttribute("data-opt-idx"));
+              sessionState.textAnswers[tId] = oIdx;
+              saveSession();
+              updateCounters();
+              renderTextTasks();
+              rebuildReportAndPreview();
+            });
+          });
+
+          container.appendChild(card);
+        });
+      }
+
+      function updateCounters() {
+        const answeredTest = Object.keys(sessionState.answers).length;
+        const answeredText = Object.keys(sessionState.textAnswers).length;
+        document.getElementById("answeredCountDisplay").textContent = `${answeredTest} / 60`;
+        document.getElementById("textAnsweredDisplay").textContent = `${answeredText} / 9`;
+      }
+
+      // =========================================================================
+      // ПОДСЧЁТ БАЛЛОВ, РАЗБИВКА ПО ТЕМАМ И ФОРМИРОВАНИЕ ОТЧЁТА ДЛЯ УЧИТЕЛЯ
+      // =========================================================================
+      function evaluateCurrentSession() {
+        let testScore = 0;
+        const wrongQuestionNumbers = [];
+        const topicStats = {};
+
+        TOPICS.forEach((t) => {
+          topicStats[t.id] = { label: t.label, total: 0, correct: 0 };
+        });
+
+        sessionState.items.forEach((item, idx) => {
+          const q = QUESTION_MAP.get(item.questionId);
+          const chosen = sessionState.answers[item.questionId];
+          if (topicStats[q.topicId]) {
+            topicStats[q.topicId].total += 1;
+          }
+          if (chosen === q.correctIndex) {
+            testScore += 1;
+            if (topicStats[q.topicId]) {
+              topicStats[q.topicId].correct += 1;
+            }
+          } else {
+            wrongQuestionNumbers.push(idx + 1);
+          }
+        });
+
+        let textScore = 0;
+        TEXT_TASKS.forEach((t) => {
+          const chosen = sessionState.textAnswers[t.id];
+          if (topicStats[t.topicId]) {
+            topicStats[t.topicId].total += 1;
+          }
+          if (chosen === t.correctIndex) {
+            textScore += 1;
+            if (topicStats[t.topicId]) {
+              topicStats[t.topicId].correct += 1;
+            }
+          }
+        });
+
+        const totalScore = testScore + textScore;
+        const maxTotal = 69;
+        const percent = Math.round((totalScore / maxTotal) * 100);
+        const testPercent = Math.round((testScore / 60) * 100);
+        const textPercent = Math.round((textScore / 9) * 100);
+
+        return {
+          testScore,
+          testPercent,
+          textScore,
+          textPercent,
+          totalScore,
+          maxTotal,
+          percent,
+          wrongQuestionNumbers,
+          topicStats
+        };
+      }
+
+      function buildTeacherReportText(evalData) {
+        const fio = participant.fio || "Не указано";
+        const school = participant.school || "Не указана";
+        const grade = participant.grade || "Не указан";
+        const nowStr = formatDateTime(new Date());
+        const modeLabel = sessionState.mode === "olympiad" ? "Олимпиада (120 мин)" : "Тренировка";
+        const wrongStr =
+          evalData.wrongQuestionNumbers.length > 0
+            ? evalData.wrongQuestionNumbers.join(", ")
+            : "нет";
+
+        const topicLines = Object.values(evalData.topicStats).map((st) => {
+          const p = st.total > 0 ? Math.round((st.correct / st.total) * 100) : 0;
+          return `  • ${st.label}: ${st.correct} / ${st.total} (${p}%)`;
+        });
+
+        return [
+          "ОТЧЁТ ПО ТРЕНАЖЁРУ (РУССКИЙ ЯЗЫК И ЛИТЕРАТУРА)",
+          `ФИО: ${fio}`,
+          `Школа: ${school}`,
+          `Класс: ${grade}`,
+          `Дата и время: ${nowStr}`,
+          `Режим: ${modeLabel}`,
+          `Баллы за тест (Раздел I): ${evalData.testScore} из 60 (${evalData.testPercent}%)`,
+          `Раздел II (Работа с текстом): ${evalData.textScore} из 9 (${evalData.textPercent}%)`,
+          `Общий результат: ${evalData.totalScore} из ${evalData.maxTotal} (${evalData.percent}%)`,
+          `Номера вопросов с ошибками (Раздел I): ${wrongStr}`,
+          "Разбивка по разделам и темам:",
+          ...topicLines
+        ].join("\n");
+      }
+
+      function renderTopicBreakdown(topicStats) {
+        const grid = document.getElementById("topicBreakdownGrid");
+        grid.innerHTML = "";
+
+        Object.values(topicStats).forEach((st) => {
+          const pct = st.total > 0 ? Math.round((st.correct / st.total) * 100) : 0;
+          let barColor = "bg-emerald-500";
+          let badgeColor = "bg-emerald-50 text-emerald-700 border-emerald-200";
+          if (pct < 50) {
+            barColor = "bg-rose-500";
+            badgeColor = "bg-rose-50 text-rose-700 border-rose-200";
+          } else if (pct < 75) {
+            barColor = "bg-amber-500";
+            badgeColor = "bg-amber-50 text-amber-800 border-amber-200";
+          }
+
+          const card = document.createElement("div");
+          card.className = "rounded-xl border border-slate-200 bg-slate-50/50 p-3.5 space-y-2";
+          card.innerHTML = `
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-sm font-semibold text-slate-800">${st.label}</span>
+              <span class="px-2 py-0.5 rounded-full text-xs font-semibold border ${badgeColor}">
+                ${st.correct} / ${st.total} (${pct}%)
+              </span>
+            </div>
+            <div class="w-full h-2.5 rounded-full bg-slate-200 overflow-hidden">
+              <div class="h-full rounded-full transition-all duration-300 ${barColor}" style="width: ${pct}%"></div>
+            </div>
+          `;
+          grid.appendChild(card);
+        });
+      }
+
+      function renderDetailedReview() {
+        const container = document.getElementById("detailedReviewContainer");
+        const list = document.getElementById("detailedReviewList");
+
+        if (!sessionState.submitted && sessionState.mode === "olympiad") {
+          container.classList.add("hidden");
+          return;
+        }
+
+        container.classList.remove("hidden");
+        list.innerHTML = "";
+
+        sessionState.items.forEach((item, idx) => {
+          const q = QUESTION_MAP.get(item.questionId);
+          const chosen = sessionState.answers[item.questionId];
+          const isOk = chosen === q.correctIndex;
+
+          const row = document.createElement("div");
+          row.className = `rounded-xl border p-3.5 text-xs sm:text-sm space-y-1 ${
+            isOk ? "bg-emerald-50/40 border-emerald-200" : "bg-rose-50/50 border-rose-200"
+          }`;
+          row.innerHTML = `
+            <div class="flex items-center justify-between gap-2 font-semibold">
+              <span>Вопрос № ${idx + 1} (${q.id})</span>
+              <span class="${isOk ? "text-emerald-700" : "text-rose-700"}">${isOk ? "Верно" : "Ошибка"}</span>
+            </div>
+            <div class="text-slate-800">${q.text}</div>
+            <div class="text-slate-600">
+              Ваш ответ: <strong>${chosen !== undefined ? q.options[chosen] : "не выбран"}</strong> |
+              Правильный: <strong>${q.options[q.correctIndex]}</strong>
+            </div>
+            <div class="text-slate-500 text-xs">${q.explanation}</div>
+          `;
+          list.appendChild(row);
+        });
+      }
+
+      function rebuildReportAndPreview() {
+        const evalData = evaluateCurrentSession();
+        lastEvaluation = evalData;
+        lastReportText = buildTeacherReportText(evalData);
+
+        document.getElementById("statTestScore").textContent = `${evalData.testScore} / 60`;
+        document.getElementById("statTestPercent").textContent = `${evalData.testPercent}%`;
+        document.getElementById("statTextScore").textContent = `${evalData.textScore} / 9`;
+        document.getElementById("statTextPercent").textContent = `${evalData.textPercent}%`;
+        document.getElementById("statTotalScore").textContent = `${evalData.totalScore} / ${evalData.maxTotal}`;
+        document.getElementById("statTotalPercent").textContent = `${evalData.percent}%`;
+
+        document.getElementById("statWrongNumbers").textContent =
+          evalData.wrongQuestionNumbers.length > 0
+            ? evalData.wrongQuestionNumbers.join(", ")
+            : "Нет ошибок";
+
+        document.getElementById("teacherReportPreview").value = lastReportText;
+        renderTopicBreakdown(evalData.topicStats);
+        renderDetailedReview();
+      }
+
+      // =========================================================================
+      // ЗАВЕРШЕНИЕ СЕССИИ И ЗАПИСЬ В ТАБЛИЦУ РЕЗУЛЬТАТОВ
+      // =========================================================================
+      function finalizeSession(autoByTimer = false) {
+        sessionState.submitted = true;
+        sessionState.textChecked = true;
+        if (timerInterval) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+        }
+        saveSession();
+
+        const evalData = evaluateCurrentSession();
+        const modeLabel = sessionState.mode === "olympiad" ? "Олимпиада" : "Тренировка";
+
+        const record = {
+          id: `res_${Date.now()}`,
+          datetime: formatDateTime(new Date()),
+          fio: participant.fio || "Без ФИО",
+          school: participant.school || "—",
+          grade: participant.grade || "—",
+          mode: modeLabel,
+          testScore: evalData.testScore,
+          textScore: evalData.textScore,
+          totalScore: evalData.totalScore,
+          maxTotal: evalData.maxTotal,
+          percent: evalData.percent,
+          wrongQuestionNumbers: evalData.wrongQuestionNumbers,
+          reportText: buildTeacherReportText(evalData)
+        };
+
+        resultsHistory.unshift(record);
+        saveResultsHistory();
+
+        renderQuestionCard();
+        renderQuestionNavigator();
+        renderTextTasks();
+        rebuildReportAndPreview();
+        renderResultsTable();
+
+        document.getElementById("summarySubtitle").textContent = autoByTimer
+          ? "Время олимпиады истекло — работа автоматически проверена и сохранена в таблице результатов."
+          : "Работа проверена! Вы можете скопировать отчёт для учителя или перейти к таблице результатов.";
+
+        showToast(
+          `Результат записан в таблицу: ${evalData.totalScore} из ${evalData.maxTotal} (${evalData.percent}%).`,
+          "success"
+        );
+      }
+
+      // =========================================================================
+      // ТАБЛИЦА РЕЗУЛЬТАТОВ: РЕНДЕР, ЭКСПОРТ CSV, КОПИРОВАНИЕ, ОЧИСТКА
+      // =========================================================================
+      function renderResultsTable() {
+        const tbody = document.getElementById("resultsTableBody");
+        const countBadge = document.getElementById("resultsCountBadge");
+        countBadge.textContent = String(resultsHistory.length);
+
+        if (resultsHistory.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="10" class="px-4 py-8 text-center text-sm text-slate-500">
+                Пока нет сохранённых попыток. Нажмите «Завершить и проверить работу», чтобы записать первый результат.
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        tbody.innerHTML = "";
+        resultsHistory.forEach((row, index) => {
+          const tr = document.createElement("tr");
+          tr.className = "hover:bg-slate-50/80 transition";
+
+          tr.innerHTML = `
+            <td class="px-3.5 py-3 font-semibold text-slate-700">${index + 1}</td>
+            <td class="px-3.5 py-3 text-slate-600 whitespace-nowrap">${escapeHtml(row.datetime)}</td>
+            <td class="px-3.5 py-3 font-medium text-slate-900">${escapeHtml(row.fio)}</td>
+            <td class="px-3.5 py-3 text-slate-600">${escapeHtml(row.school)}</td>
+            <td class="px-3.5 py-3 text-slate-600 whitespace-nowrap">${escapeHtml(row.grade)}</td>
+            <td class="px-3.5 py-3 whitespace-nowrap">
+              <span class="px-2 py-0.5 rounded-full text-xs font-medium ${
+                row.mode === "Олимпиада"
+                  ? "bg-indigo-50 text-indigo-700 border border-indigo-200"
+                  : "bg-slate-100 text-slate-700"
+              }">${escapeHtml(row.mode)}</span>
+            </td>
+            <td class="px-3.5 py-3 text-center font-semibold text-slate-800">${row.testScore} / 60</td>
+            <td class="px-3.5 py-3 text-center font-bold text-indigo-700">${row.totalScore} / ${row.maxTotal}</td>
+            <td class="px-3.5 py-3 text-center font-semibold text-slate-800">${row.percent}%</td>
+            <td class="px-3.5 py-3 text-right whitespace-nowrap space-x-1.5">
+              <button
+                type="button"
+                data-action="review"
+                data-id="${row.id}"
+                class="px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-300 text-slate-700 hover:bg-slate-100 transition"
+              >
+                Посмотреть разбор
+              </button>
+              <button
+                type="button"
+                data-action="copy-row"
+                data-id="${row.id}"
+                class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-700 transition"
+              >
+                Скопировать строку
+              </button>
+            </td>
+          `;
+
+          tr.querySelector('button[data-action="review"]').addEventListener("click", () => {
+            document.getElementById("teacherReportPreview").value =
+              row.reportText ||
+              `${row.datetime} | ${row.fio} | ${row.school} | ${row.grade} | ${row.mode} | Тест: ${row.testScore}/60 | Итог: ${row.totalScore}/${row.maxTotal} (${row.percent}%)`;
+            document.getElementById("detailedReviewContainer").classList.remove("hidden");
+            document.getElementById("summaryReportSection").scrollIntoView({ behavior: "smooth" });
+          });
+
+          tr.querySelector('button[data-action="copy-row"]').addEventListener("click", () => {
+            const lineText = `${index + 1}. ${row.datetime} | ${row.fio} | ${row.school} | ${row.grade} | ${row.mode} | Тест: ${row.testScore}/60 | Итог: ${row.totalScore}/${row.maxTotal} (${row.percent}%)`;
+            copyTextSafe(lineText, () => {
+              showToast("Строка результата скопирована в буфер обмена.", "success");
+            });
+          });
+
+          tbody.appendChild(tr);
+        });
+      }
+
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function exportResultsToCsv() {
+        if (resultsHistory.length === 0) {
+          showToast("Таблица результатов пока пуста — нечего экспортировать.", "warning");
+          return;
+        }
+
+        const headers = ["№", "Дата/время", "ФИО", "Школа", "Класс", "Режим", "Тест (из 60)", "Текст (из 9)", "Итог", "%"];
+        const escapeCsvCell = (val) => `"${String(val ?? "").replace(/"/g, '""')}"`;
+
+        const lines = [
+          headers.map(escapeCsvCell).join(";"),
+          ...resultsHistory.map((r, idx) =>
+            [
+              idx + 1,
+              r.datetime,
+              r.fio,
+              r.school,
+              r.grade,
+              r.mode,
+              `${r.testScore}/60`,
+              `${r.textScore}/9`,
+              `${r.totalScore}/${r.maxTotal}`,
+              `${r.percent}%`
+            ]
+              .map(escapeCsvCell)
+              .join(";")
+          )
+        ];
+
+        // BOM для корректного открытия кириллицы в Excel
+        const csvContent = "\uFEFF" + lines.join("\r\n");
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `rezultaty_trenazher_${new Date().toISOString().slice(0, 10)}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        showToast("CSV-файл скачан — его можно открыть в Excel или Google Таблицах.", "success");
+      }
+
+      function buildWholeTableText() {
+        if (resultsHistory.length === 0) {
+          return "Таблица результатов пуста.";
+        }
+        const header = "№ | Дата/время | ФИО | Школа | Класс | Режим | Тест (из 60) | Итог | %";
+        const rows = resultsHistory.map(
+          (r, idx) =>
+            `${idx + 1} | ${r.datetime} | ${r.fio} | ${r.school} | ${r.grade} | ${r.mode} | ${r.testScore}/60 | ${r.totalScore}/${r.maxTotal} | ${r.percent}%`
+        );
+        return [header, ...rows].join("\n");
+      }
+
+      // =========================================================================
+      // КОПИРОВАНИЕ В БУФЕР ОБМЕНА (CLIPBOARD API + FALLBACK ЧЕРЕЗ TEXTAREA)
+      // =========================================================================
+      function copyTextSafe(text, onSuccess) {
+        if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+          navigator.clipboard
+            .writeText(text)
+            .then(() => {
+              if (onSuccess) onSuccess();
+            })
+            .catch(() => {
+              fallbackCopyTextarea(text, onSuccess);
+            });
+        } else {
+          fallbackCopyTextarea(text, onSuccess);
+        }
+      }
+
+      function fallbackCopyTextarea(text, onSuccess) {
+        try {
+          const temp = document.createElement("textarea");
+          temp.value = text;
+          temp.setAttribute("readonly", "");
+          temp.style.position = "fixed";
+          temp.style.top = "-9999px";
+          temp.style.left = "-9999px";
+          document.body.appendChild(temp);
+          temp.focus();
+          temp.select();
+          document.execCommand("copy");
+          document.body.removeChild(temp);
+          if (onSuccess) onSuccess();
+        } catch (e) {
+          showToast("Не удалось автоматически скопировать — выделите текст в поле отчёта вручную.", "warning");
+        }
+      }
+
+      // =========================================================================
+      // ПРИВЯЗКА СОБЫТИЙ И ИНИЦИАЛИЗАЦИЯ
+      // =========================================================================
+      function bindEvents() {
+        // Навигация по вкладкам
+        document.querySelectorAll(".nav-btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const target = btn.getAttribute("data-nav");
+            document.querySelectorAll(".nav-btn").forEach((b) => {
+              b.classList.remove("tab-active");
+              b.classList.add("text-slate-600");
+            });
+            btn.classList.add("tab-active");
+            btn.classList.remove("text-slate-600");
+
+            const viewTest = document.getElementById("viewTest");
+            const viewText = document.getElementById("viewText");
+            const resultsSection = document.getElementById("resultsTableSection");
+
+            if (target === "test") {
+              viewTest.classList.remove("hidden");
+              viewText.classList.add("hidden");
+              viewTest.scrollIntoView({ behavior: "smooth" });
+            } else if (target === "text") {
+              viewTest.classList.add("hidden");
+              viewText.classList.remove("hidden");
+              viewText.scrollIntoView({ behavior: "smooth" });
+            } else if (target === "results") {
+              resultsSection.scrollIntoView({ behavior: "smooth" });
+            }
+          });
+        });
+
+        // Переключение режимов
+        document.getElementById("modeTrainingBtn").addEventListener("click", () => {
+          sessionState.mode = "training";
+          saveSession();
+          renderModeButtons();
+          startOlympiadTimerIfNeeded();
+          renderQuestionCard();
+          renderQuestionNavigator();
+          renderTextTasks();
+          rebuildReportAndPreview();
+        });
+
+        document.getElementById("modeOlympiadBtn").addEventListener("click", () => {
+          sessionState.mode = "olympiad";
+          if (!sessionState.remainingSeconds || sessionState.remainingSeconds <= 0) {
+            sessionState.remainingSeconds = 120 * 60;
+          }
+          saveSession();
+          renderModeButtons();
+          startOlympiadTimerIfNeeded();
+          renderQuestionCard();
+          renderQuestionNavigator();
+          renderTextTasks();
+          rebuildReportAndPreview();
+        });
+
+        // Новая сессия (60 новых вопросов)
+        document.getElementById("newSessionBtn").addEventListener("click", () => {
+          sessionState = createFreshSession(sessionState.mode);
+          saveSession();
+          renderModeButtons();
+          startOlympiadTimerIfNeeded();
+          updateCounters();
+          renderQuestionNavigator();
+          renderQuestionCard();
+          renderTextTasks();
+          rebuildReportAndPreview();
+          showToast("Запущена новая сессия из 60 вопросов с перемешанными вариантами А–Г.", "info");
+        });
+
+        // Навигация Вопросы Назад / Далее
+        document.getElementById("prevQuestionBtn").addEventListener("click", () => {
+          if (sessionState.currentIndex > 0) {
+            sessionState.currentIndex -= 1;
+            saveSession();
+            renderQuestionCard();
+            renderQuestionNavigator();
+          }
+        });
+
+        document.getElementById("nextQuestionBtn").addEventListener("click", () => {
+          if (sessionState.currentIndex < sessionState.items.length - 1) {
+            sessionState.currentIndex += 1;
+            saveSession();
+            renderQuestionCard();
+            renderQuestionNavigator();
+          }
+        });
+
+        // Проверка Раздела II
+        document.getElementById("checkTextSectionBtn").addEventListener("click", () => {
+          sessionState.textChecked = true;
+          saveSession();
+          renderTextTasks();
+          rebuildReportAndPreview();
+          showToast("Раздел II (работа с текстом) проверен.", "success");
+        });
+
+        // Завершить и проверить работу
+        document.getElementById("finishAllBtn").addEventListener("click", () => {
+          finalizeSession(false);
+          document.getElementById("summaryReportSection").scrollIntoView({ behavior: "smooth" });
+        });
+
+        // Кнопка «Скопировать результат для отправки учителю»
+        document.getElementById("copyTeacherReportBtn").addEventListener("click", () => {
+          const textToCopy = lastReportText || buildTeacherReportText(evaluateCurrentSession());
+          copyTextSafe(textToCopy, () => {
+            const banner = document.getElementById("copyReportBanner");
+            banner.textContent = "Результат скопирован — можно вставить в WhatsApp или Telegram";
+            banner.classList.remove("hidden");
+            showToast("Результат скопирован — можно вставить в WhatsApp или Telegram", "success");
+          });
+        });
+
+        // Переход к таблице результатов
+        document.getElementById("jumpToResultsTableBtn").addEventListener("click", () => {
+          document.getElementById("resultsTableSection").scrollIntoView({ behavior: "smooth" });
+        });
+
+        // Управление таблицей результатов
+        document.getElementById("exportCsvBtn").addEventListener("click", exportResultsToCsv);
+
+        document.getElementById("copyTableBtn").addEventListener("click", () => {
+          const tableText = buildWholeTableText();
+          copyTextSafe(tableText, () => {
+            showToast("Таблица результатов скопирована в буфер обмена.", "success");
+          });
+        });
+
+        const clearConfirmBox = document.getElementById("clearConfirmBox");
+        document.getElementById("clearResultsBtn").addEventListener("click", () => {
+          clearConfirmBox.classList.remove("hidden");
+        });
+
+        document.getElementById("cancelClearResultsBtn").addEventListener("click", () => {
+          clearConfirmBox.classList.add("hidden");
+        });
+
+        document.getElementById("confirmClearResultsBtn").addEventListener("click", () => {
+          resultsHistory = [];
+          saveResultsHistory();
+          clearConfirmBox.classList.add("hidden");
+          renderResultsTable();
+          showToast("История результатов очищена.", "info");
+        });
+
+        document.getElementById("toastClose").addEventListener("click", () => {
+          document.getElementById("toastContainer").classList.add("hidden");
+        });
+      }
+
+      function init() {
+        updateRoundBadge();
+        initParticipantInputs();
+        bindEvents();
+        renderModeButtons();
+        startOlympiadTimerIfNeeded();
+        updateCounters();
+        renderQuestionNavigator();
+        renderQuestionCard();
+        renderTextTasks();
+        rebuildReportAndPreview();
+        renderResultsTable();
+      }
+
+      window.addEventListener("DOMContentLoaded", init);
+    })();
+  </script>
+</body>
+                </html>
